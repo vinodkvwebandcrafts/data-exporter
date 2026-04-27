@@ -1,6 +1,25 @@
-// Placeholder; the real implementation lands in Task 14.
-// This stub exists so that admin/src/index.ts (registered in Task 12) can
-// import the symbol without breaking `tsc --noEmit`.
-import * as React from "react";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
+import { Button } from "@strapi/design-system";
+import { useRBAC } from "@strapi/strapi/admin";
+import { ExportModal } from "./ExportModal";
 
-export const ExportButton = (): React.ReactElement | null => null;
+export function ExportButton() {
+  const { uid } = useParams<{ uid: string }>();
+  const [open, setOpen] = useState(false);
+
+  const { isLoading, allowedActions } = useRBAC({
+    canExport: [{ action: "plugin::data-exporter.export", subject: uid }],
+  } as any);
+
+  if (isLoading || !allowedActions.canExport || !uid) return null;
+
+  return (
+    <>
+      <Button variant="secondary" onClick={() => setOpen(true)}>
+        Export
+      </Button>
+      {open && <ExportModal uid={uid} onClose={() => setOpen(false)} />}
+    </>
+  );
+}
