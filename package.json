@@ -1,6 +1,13 @@
 {
   "version": "0.1.0",
-  "keywords": ["strapi", "plugin", "strapi-plugin", "export", "xlsx", "excel"],
+  "keywords": [
+    "strapi",
+    "plugin",
+    "strapi-plugin",
+    "export",
+    "xlsx",
+    "excel"
+  ],
   "type": "commonjs",
   "exports": {
     "./package.json": "./package.json",
@@ -19,42 +26,56 @@
       "default": "./dist/server/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "strapi-plugin build",
     "watch": "strapi-plugin watch",
     "watch:link": "strapi-plugin watch:link",
     "verify": "strapi-plugin verify",
     "test:ts:front": "tsc -p admin/tsconfig.json",
-    "test:ts:back": "tsc -p server/tsconfig.json"
+    "test:ts:back": "tsc -p server/tsconfig.json",
+    "test:unit": "vitest run --dir tests/unit",
+    "test:unit:watch": "vitest --dir tests/unit",
+    "test:component": "vitest run --dir tests/component --environment jsdom",
+    "test:integration": "jest --config tests/integration/jest.config.js",
+    "test": "yarn test:unit && yarn test:component && yarn test:integration"
   },
   "dependencies": {
     "exceljs": "^4.4.0"
   },
   "devDependencies": {
-    "@strapi/strapi": "^5.43.0",
-    "@strapi/sdk-plugin": "^6.1.0",
-    "prettier": "^3.8.3",
     "@strapi/design-system": "^2.2.0",
     "@strapi/icons": "^2.2.0",
-    "react-intl": "^6.8.9",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.30.3",
-    "styled-components": "^6.4.1",
+    "@strapi/sdk-plugin": "^6.1.0",
+    "@strapi/strapi": "^5.43.0",
+    "@strapi/typescript-utils": "^5.43.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/jest": "^30.0.0",
     "@types/react": "^18.3.28",
     "@types/react-dom": "^18.3.7",
-    "@strapi/typescript-utils": "^5.43.0",
-    "typescript": "^5.9.3"
-  },
-  "peerDependencies": {
-    "@strapi/strapi": "^5.43.0",
-    "@strapi/sdk-plugin": "^6.1.0",
-    "@strapi/design-system": "^2.2.0",
-    "@strapi/icons": "^2.2.0",
-    "react-intl": "^6.8.9",
+    "@vitest/coverage-v8": "^4.1.5",
+    "jest": "^30.3.0",
+    "jsdom": "^29.1.0",
+    "prettier": "^3.8.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-intl": "^6.8.9",
+    "react-router-dom": "^6.30.3",
+    "styled-components": "^6.4.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.5"
+  },
+  "peerDependencies": {
+    "@strapi/design-system": "^2.2.0",
+    "@strapi/icons": "^2.2.0",
+    "@strapi/sdk-plugin": "^6.1.0",
+    "@strapi/strapi": "^5.43.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-intl": "^6.8.9",
     "react-router-dom": "^6.30.3",
     "styled-components": "^6.4.1"
   },
