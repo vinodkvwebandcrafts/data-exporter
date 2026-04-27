@@ -1,18 +1,16 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@strapi/design-system";
-import { useRBAC } from "@strapi/strapi/admin";
 import { ExportModal } from "./ExportModal";
 
 export function ExportButton() {
-  const { uid } = useParams<{ uid: string }>();
+  // Strapi 5's content-manager URL is /content-manager/collection-types/:slug
+  // where :slug carries the UID value (e.g. "api::article.article").
+  const { slug } = useParams<{ slug: string }>();
+  const uid = slug;
   const [open, setOpen] = useState(false);
 
-  const { isLoading, allowedActions } = useRBAC({
-    canExport: [{ action: "plugin::data-exporter.export", subject: uid }],
-  } as any);
-
-  if (isLoading || !allowedActions.canExport || !uid) return null;
+  if (!uid) return null;
 
   return (
     <>
