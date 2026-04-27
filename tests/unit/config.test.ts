@@ -31,4 +31,20 @@ test('plugin config', () => {
     expect(() => config.validator({ flattenDepth: 0 })).toThrow();
     expect(() => config.validator({ flattenDepth: 11 })).toThrow();
   });
+
+  it('validator throws when relationDisplayField is not a string', () => {
+    expect(() => config.validator({ relationDisplayField: 42 as any })).toThrow();
+  });
+
+  it('validator throws when excludeAttributes is not an array', () => {
+    expect(() => config.validator({ excludeAttributes: 'password' as any })).toThrow();
+  });
+
+  it('validator throws when filenameTemplate is not a string', () => {
+    expect(() => config.validator({ filenameTemplate: 123 as any })).toThrow();
+  });
+
+  it('validator throws when sanitizeFormulas is not a boolean', () => {
+    expect(() => config.validator({ sanitizeFormulas: 'true' as any })).toThrow();
+  });
 });
