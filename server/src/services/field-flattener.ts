@@ -99,3 +99,79 @@ export function describe(uid: string, ctx: DescribeContext): FieldDescriptor[] {
   }
   return describeAttributes(ct.attributes, ctx, '', 0);
 }
+
+// ---- flatten ----
+
+export type FlattenContext = {
+  relationDisplayField: string;
+};
+
+function pickByPath(obj: any, path: string): any {
+  return path.split('.').reduce((acc, seg) => (acc == null ? acc : acc[seg]), obj);
+}
+
+function valueForDescriptor(
+  entry: any,
+  d: FieldDescriptor,
+  ctx: FlattenContext,
+): string | number | boolean | null {
+  const raw = pickByPath(entry, d.path);
+
+  if (raw == null) return null;
+
+  switch (d.type) {
+    case 'string':
+    case 'text':
+    case 'enumeration':
+    case 'uid':
+    case 'email':
+    case 'date':
+    case 'time':
+    case 'datetime':
+      return typeof raw === 'string' ? raw : String(raw);
+
+    case 'integer':
+    case 'decimal':
+      return typeof raw === 'number' ? raw : Number(raw);
+
+    case 'boolean':
+      return Boolean(raw);
+
+    case 'json':
+    case 'component-repeatable-json':
+    case 'dynamic-zone-json':
+      return JSON.stringify(raw);
+
+    case 'media-url':
+      return typeof raw === 'object' && raw !== null && 'url' in raw
+        ? (raw.url as string) ?? null
+        : null;
+
+    case 'relation': {
+      if (Array.isArray(raw)) {
+        return raw
+          .map((r) => r?.[ctx.relationDisplayField])
+          .filter((v) => v !== undefined && v !== null)
+          .join(',');
+      }
+      if (typeof raw === 'object' && ctx.relationDisplayField in raw) {
+        return raw[ctx.relationDisplayField] ?? null;
+      }
+      return null;
+    }
+  }
+
+  return null;
+}
+
+export function flatten(
+  entry: any,
+  descriptors: FieldDescriptor[],
+  ctx: FlattenContext,
+): Record<string, string | number | boolean | null> {
+  const out: Record<string, string | number | boolean | null> = {};
+  for (const d of descriptors) {
+    out[d.path] = valueForDescriptor(entry, d, ctx);
+  }
+  return out;
+}
