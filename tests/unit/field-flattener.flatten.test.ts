@@ -121,4 +121,37 @@ test('flatten()', () => {
     );
     expect(JSON.parse(row.metadata as string)).toEqual({ foo: 'bar' });
   });
+
+  it('formats datetime fields as DD-MM-YYYY', () => {
+    const row = flatten(
+      { publishedDate: '2026-04-27T14:30:15.000Z' },
+      descriptors,
+      flattenCtx,
+    );
+    // The local date for that UTC instant is what shows; check the shape.
+    expect(row.publishedDate).toMatch(/^\d{2}-\d{2}-\d{4}$/);
+  });
+
+  it('formats datetime fields with day/month/year ordering', () => {
+    // Pick a date with unambiguous day vs month so we can pin the order.
+    const row = flatten(
+      // Noon UTC; well clear of timezone date-flip in any timezone.
+      { publishedDate: '2026-04-27T12:00:00.000Z' },
+      descriptors,
+      flattenCtx,
+    );
+    const [dd, mm, yyyy] = (row.publishedDate as string).split('-');
+    expect(dd).toBe('27');
+    expect(mm).toBe('04');
+    expect(yyyy).toBe('2026');
+  });
+
+  it('passes through unparseable date strings rather than NaN-NaN-NaN', () => {
+    const row = flatten(
+      { publishedDate: 'not-a-date' },
+      descriptors,
+      flattenCtx,
+    );
+    expect(row.publishedDate).toBe('not-a-date');
+  });
 });

@@ -110,6 +110,19 @@ function pickByPath(obj: any, path: string): any {
   return path.split('.').reduce((acc, seg) => (acc == null ? acc : acc[seg]), obj);
 }
 
+function formatDdMmYyyy(raw: unknown): string | null {
+  if (raw == null) return null;
+  const d = raw instanceof Date ? raw : new Date(raw as string);
+  if (isNaN(d.getTime())) {
+    // Unparseable — surface the original value rather than swallow it.
+    return typeof raw === 'string' ? raw : String(raw);
+  }
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = String(d.getFullYear());
+  return `${dd}-${mm}-${yyyy}`;
+}
+
 function valueForDescriptor(
   entry: any,
   d: FieldDescriptor,
@@ -120,14 +133,16 @@ function valueForDescriptor(
   if (raw == null) return null;
 
   switch (d.type) {
+    case 'date':
+    case 'datetime':
+      return formatDdMmYyyy(raw);
+
     case 'string':
     case 'text':
     case 'enumeration':
     case 'uid':
     case 'email':
-    case 'date':
     case 'time':
-    case 'datetime':
       return typeof raw === 'string' ? raw : String(raw);
 
     case 'integer':
