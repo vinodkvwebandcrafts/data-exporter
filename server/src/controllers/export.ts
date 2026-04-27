@@ -7,7 +7,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async fields(ctx: any) {
     const { uid } = ctx.params;
     if (!uid || typeof uid !== 'string') {
-      return ctx.badRequest({ code: 'INVALID_BODY', message: 'uid is required' });
+      return ctx.badRequest('uid is required', { code: 'INVALID_BODY' });
     }
     const config = strapi.config.get('plugin::data-exporter') as Record<string, any>;
     try {
@@ -20,7 +20,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       ctx.body = descriptors;
     } catch (e: any) {
       if (e.code === 'UNKNOWN_UID') {
-        return ctx.badRequest({ code: 'UNKNOWN_UID', message: e.message });
+        return ctx.badRequest(e.message, { code: 'UNKNOWN_UID' });
       }
       throw e;
     }
@@ -34,10 +34,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       query === null ||
       (fields !== undefined && !Array.isArray(fields))
     ) {
-      return ctx.badRequest({
-        code: 'INVALID_BODY',
-        message: 'Expected { uid: string, query: object, fields?: string[] }',
-      });
+      return ctx.badRequest(
+        'Expected { uid: string, query: object, fields?: string[] }',
+        { code: 'INVALID_BODY' },
+      );
     }
 
     try {
@@ -51,10 +51,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         case 'UNSUPPORTED_KIND':
         case 'EMPTY_FIELDS':
         case 'INVALID_BODY':
-          return ctx.badRequest({ code: e.code, message: e.message });
+          return ctx.badRequest(e.message, { code: e.code });
         case 'ROW_LIMIT_EXCEEDED':
           ctx.status = 413;
-          ctx.body = { error: { code: e.code, message: e.message, limit: e.limit, observed: e.observed } };
+          ctx.body = {
+            error: {
+              code: e.code,
+              message: e.message,
+              limit: e.limit,
+              observed: e.observed,
+              status: 413,
+            },
+          };
           return;
         default:
           strapi.log.error(e, { uid, query });
