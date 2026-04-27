@@ -72,6 +72,9 @@ $RECYCLE.BIN/
 *.sql
 *.sqlite
 *.sqlite3
+*.db
+*.db-journal
+.strapi-updater.json
 
 
 ############################
