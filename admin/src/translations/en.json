@@ -1,1 +1,13 @@
-{}
+{
+  "plugin.name": "Data Exporter",
+  "button.export": "Export",
+  "modal.title": "Export to xlsx",
+  "modal.fields.label": "Fields to include",
+  "modal.fields.selectAll": "Select all",
+  "modal.fields.selectNone": "Select none",
+  "modal.submit": "Export",
+  "modal.cancel": "Cancel",
+  "modal.exporting": "Exporting…",
+  "modal.error.generic": "Export failed",
+  "permission.export.label": "Export collections to xlsx"
+}
