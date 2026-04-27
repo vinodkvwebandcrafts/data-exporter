@@ -8,7 +8,8 @@ export type RunArgs = {
   strapi: Core.Strapi;
   uid: string;
   query: Record<string, any>;
-  fields: string[];
+  /** Optional. If omitted or empty, every flattenable field is exported. */
+  fields?: string[];
 };
 
 export type RunResult = { stream: Readable; filename: string };
@@ -45,9 +46,12 @@ export async function run({ strapi, uid, query, fields }: RunArgs): Promise<RunR
     flattenDepth: config.flattenDepth,
   });
 
-  const selected = allDescriptors.filter((d) => fields.includes(d.path));
+  const selected =
+    !fields || fields.length === 0
+      ? allDescriptors
+      : allDescriptors.filter((d) => fields.includes(d.path));
   if (selected.length === 0) {
-    throw err('EMPTY_FIELDS', 'No exportable fields after applying filter');
+    throw err('EMPTY_FIELDS', 'No exportable fields for this content type');
   }
 
   const docs = (strapi as any).documents(uid);

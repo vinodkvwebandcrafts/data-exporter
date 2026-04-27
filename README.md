@@ -3,9 +3,9 @@
 [![npm version](https://img.shields.io/npm/v/strapi-plugin-data-exporter.svg)](https://www.npmjs.com/package/strapi-plugin-data-exporter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit)
 
-Export Strapi v5 collections to `.xlsx` files directly from the admin panel.
+Export Strapi v5 collection entries to `.xlsx` files directly from the admin panel.
 
-A button appears in every Content Manager list view; clicking it opens a modal where you pick which fields to include, then streams the matching entries down to your browser as an Excel workbook. Filters, sort, locale, and draft/publish state from the list view are honored — what you see is what you export.
+Select one or more entries in any Content Manager list view; an **Export** action appears alongside Delete/Publish. Click it and the selected entries stream down to your browser as an Excel workbook with every flattenable field included.
 
 ## Requirements
 
@@ -47,19 +47,18 @@ Bulk-exporting a collection is intentionally separate from reading individual en
 3. Under the relevant content type, tick **Export collections**.
 4. Save.
 
-Users in roles without this permission won't see the Export button on the list view.
+Users without this permission will see a **403 Forbidden** toast when they try to export.
 
 Super-admins always have access — they don't need explicit permission.
 
 ## Usage
 
 1. Open any collection in the **Content Manager**.
-2. Apply filters, sort, locale, or draft/publish state as you would normally.
-3. Click **Export** in the list-view header.
-4. Pick the fields you want in the modal.
-5. Click **Export**. The `.xlsx` downloads automatically.
+2. Tick the checkboxes for the rows you want to export.
+3. Click **Export** in the bulk-action bar that appears above the table.
+4. The `.xlsx` downloads automatically with every flattenable field included for the selected entries.
 
-The exported file matches the rows visible in the list view: the same filters, the same sort order, the same locale, the same draft/publish state.
+To export the entire collection, use the "select all" checkbox in the table header (Strapi-managed, paginates as expected).
 
 ## Configuration
 
@@ -96,12 +95,13 @@ export default () => ({
 ## How an export happens
 
 ```
-admin click  →  POST /data-exporter/export { uid, query, fields }
+admin click  →  POST /data-exporter/export
+                  { uid, query: { filters: { documentId: { $in: [...] } } } }
             →  isAuthenticatedAdmin policy
             →  has-export-permission policy   (RBAC check on uid)
             →  controller validates body
             →  exporter.run
-                ├─ describe(uid) → validate fields
+                ├─ describe(uid) → resolve flattenable fields
                 ├─ documentService.count(query) → check vs maxRows
                 ├─ open xlsx stream-writer
                 └─ paginate documentService.findMany (page=N, pageSize)
@@ -113,6 +113,8 @@ admin click  →  POST /data-exporter/export { uid, query, fields }
 ```
 
 The export streams — entries flow from the database, through pagination, into xlsx rows, and out to the browser without ever buffering the full file in memory.
+
+The endpoint also accepts an optional `fields: string[]` to restrict columns; the bulk-action UI omits it (sends every flattenable field).
 
 ## What gets exported
 
@@ -147,10 +149,13 @@ Disable only if your data is fully trusted **and** downstream consumers handle e
 ## FAQ
 
 **Q: Can I export every locale at once?**
-No — the export reflects the current list-view locale. Switch the locale picker to export a different language, or repeat the export.
+No — Strapi's bulk-selection lives within the current locale. Switch the locale picker to export a different language, or repeat per locale.
 
 **Q: Can I customize the relation display per content type?**
 Not in v1. `relationDisplayField` is global. Per-relation overrides are tracked for v2.
+
+**Q: Can I pick which columns to include?**
+Not from the bulk action — it always exports every flattenable field. The HTTP endpoint (`POST /data-exporter/export`) accepts an optional `fields: string[]` if you want to drive it programmatically.
 
 **Q: Why is the file empty / why does my browser open the response inline?**
 Some networks rewrite `Content-Disposition` headers. If filenames look generic (`export.xlsx`) or the file streams to the browser tab instead of downloading, check that no proxy is stripping headers between Strapi and the client.

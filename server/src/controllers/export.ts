@@ -32,11 +32,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       typeof uid !== 'string' ||
       typeof query !== 'object' ||
       query === null ||
-      !Array.isArray(fields)
+      (fields !== undefined && !Array.isArray(fields))
     ) {
       return ctx.badRequest({
         code: 'INVALID_BODY',
-        message: 'Expected { uid: string, query: object, fields: string[] }',
+        message: 'Expected { uid: string, query: object, fields?: string[] }',
       });
     }
 

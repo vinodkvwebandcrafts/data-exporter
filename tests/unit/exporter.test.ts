@@ -84,4 +84,45 @@ test('exporter.run', () => {
     expect(ws.getRow(2).getCell(2).value).toBe(10);
     expect(ws.getRow(3).getCell(1).value).toBe('B');
   });
+
+  it('exports every flattenable field when fields is omitted', async () => {
+    const strapi = makeStrapi({
+      total: 1,
+      entries: [{ id: 1, title: 'Hello', views: 5 }],
+    });
+    const { stream } = await run({
+      strapi: strapi as any,
+      uid: 'api::article.article',
+      query: {},
+    });
+    const buf = await streamToBuffer(stream);
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(buf);
+    const ws = wb.worksheets[0];
+    // Header should include many columns (every flattenable field), at minimum title and views
+    const headers = ws.getRow(1).values as unknown[];
+    expect(headers).toContain('Title');
+    expect(headers).toContain('Views');
+    // And many more columns (>5) since the article fixture has lots of fields
+    expect(headers.filter((v) => typeof v === 'string').length).toBeGreaterThan(5);
+  });
+
+  it('exports every flattenable field when fields is empty array', async () => {
+    const strapi = makeStrapi({
+      total: 1,
+      entries: [{ id: 1, title: 'Hello' }],
+    });
+    const { stream } = await run({
+      strapi: strapi as any,
+      uid: 'api::article.article',
+      query: {},
+      fields: [],
+    });
+    const buf = await streamToBuffer(stream);
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(buf);
+    const ws = wb.worksheets[0];
+    const headers = ws.getRow(1).values as unknown[];
+    expect(headers).toContain('Title');
+  });
 });

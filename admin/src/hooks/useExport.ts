@@ -1,7 +1,12 @@
 import { useCallback, useState } from 'react';
 import { useFetchClient, useNotification } from '@strapi/strapi/admin';
 
-type RunArgs = { uid: string; query: Record<string, unknown>; fields: string[] };
+type RunArgs = {
+  uid: string;
+  query: Record<string, unknown>;
+  /** Optional. If omitted, the server exports every flattenable field. */
+  fields?: string[];
+};
 
 export function useExport() {
   const { post } = useFetchClient();
@@ -12,13 +17,11 @@ export function useExport() {
     async ({ uid, query, fields }: RunArgs) => {
       setIsExporting(true);
       try {
-        const response = await post(
-          `/data-exporter/export`,
-          { uid, query, fields },
-          {
-            responseType: 'blob',
-          } as any,
-        );
+        const body: Record<string, unknown> = { uid, query };
+        if (fields && fields.length > 0) body.fields = fields;
+        const response = await post(`/data-exporter/export`, body, {
+          responseType: 'blob',
+        } as any);
 
         const blob = response.data as Blob;
         const cd: string = (response as any)?.headers?.['content-disposition'] ?? '';
