@@ -1,6 +1,6 @@
 {
-  "version": "0.0.0",
-  "keywords": [],
+  "version": "0.1.0",
+  "keywords": ["strapi", "plugin", "strapi-plugin", "export", "xlsx", "excel"],
   "type": "commonjs",
   "exports": {
     "./package.json": "./package.json",
@@ -28,7 +28,9 @@
     "test:ts:front": "tsc -p admin/tsconfig.json",
     "test:ts:back": "tsc -p server/tsconfig.json"
   },
-  "dependencies": {},
+  "dependencies": {
+    "exceljs": "^4.4.0"
+  },
   "devDependencies": {
     "@strapi/strapi": "^5.43.0",
     "@strapi/sdk-plugin": "^6.1.0",
@@ -58,12 +60,16 @@
   },
   "strapi": {
     "kind": "plugin",
-    "name": "strapi-plugin-data-exporter",
+    "name": "data-exporter",
     "displayName": "Data Exporter",
     "description": "Export Strapi v5 collections to xlsx files from the admin panel."
   },
   "name": "strapi-plugin-data-exporter",
   "description": "Export Strapi v5 collections to xlsx files from the admin panel.",
   "license": "MIT",
-  "author": "vinod <vinod.kv@webandcrafts.com>"
+  "author": "vinod <vinod.kv@webandcrafts.com>",
+  "engines": {
+    "node": ">=20.0.0 <=24.x.x",
+    "npm": ">=6.0.0"
+  }
 }
