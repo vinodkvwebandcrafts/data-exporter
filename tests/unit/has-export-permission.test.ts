@@ -50,9 +50,18 @@ test('has-export-permission policy', () => {
     );
     expect(result).toBe(true);
   });
+
+  it('returns true when permission has wildcard subject (subject: null)', async () => {
+    const result = await policy(
+      ctxWith({ id: 1 }, 'api::a.a'),
+      {},
+      { strapi: makeStrapiMock([{ action: 'plugin::data-exporter.export', subject: null }]) } as any,
+    );
+    expect(result).toBe(true);
+  });
 });
 
-function makeStrapiMock(permissions: { action: string; subject: string }[]) {
+function makeStrapiMock(permissions: { action: string; subject: string | null }[]) {
   return {
     admin: {
       services: {

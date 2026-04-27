@@ -9,10 +9,18 @@ const policy = async (ctx: any, _config: unknown, { strapi }: { strapi: Core.Str
   const uid: string | undefined = ctx.params?.uid ?? ctx.request?.body?.uid;
   if (!uid) return false;
 
+  // Super-admins have implicit access to every action; their role doesn't
+  // populate explicit permission rows. Short-circuit before consulting the DB.
+  const role = (strapi as any).admin?.services?.role;
+  if (role?.hasSuperAdminRole?.(user)) return true;
+
   const perms = await strapi.admin.services.permission.findUserPermissions(user);
   return (
     Array.isArray(perms) &&
-    perms.some((p: any) => p.action === PERMISSION_ACTION && p.subject === uid)
+    perms.some(
+      (p: any) =>
+        p.action === PERMISSION_ACTION && (p.subject == null || p.subject === uid),
+    )
   );
 };
 

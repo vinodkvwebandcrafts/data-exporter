@@ -9,7 +9,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     if (!uid || typeof uid !== 'string') {
       return ctx.badRequest({ code: 'INVALID_BODY', message: 'uid is required' });
     }
-    const config = (strapi.plugin('data-exporter') as any).config() as Record<string, any>;
+    const config = strapi.config.get('plugin::data-exporter') as Record<string, any>;
     try {
       const descriptors = describeFields(uid, {
         contentTypes: (strapi as any).contentTypes,

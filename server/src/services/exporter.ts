@@ -14,7 +14,7 @@ export type RunArgs = {
 export type RunResult = { stream: Readable; filename: string };
 
 function pluginConfig(strapi: Core.Strapi) {
-  return (strapi.plugin('data-exporter') as any).config() as Record<string, any>;
+  return strapi.config.get('plugin::data-exporter') as Record<string, any>;
 }
 
 function tokenizeFilename(template: string, singularName: string): string {

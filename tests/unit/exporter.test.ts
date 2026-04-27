@@ -28,7 +28,9 @@ function makeStrapi(opts: {
   return {
     contentTypes: allFixtures.contentTypes,
     components: allFixtures.components,
-    plugin: () => ({ config: () => config }),
+    config: {
+      get: (key: string) => (key === 'plugin::data-exporter' ? config : undefined),
+    },
     documents: vi.fn(() => ({
       count: vi.fn().mockResolvedValue(opts.total),
       findMany: vi.fn().mockResolvedValue(opts.entries),
