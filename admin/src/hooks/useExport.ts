@@ -5,7 +5,7 @@ type RunArgs = { uid: string; query: Record<string, unknown>; fields: string[] }
 
 export function useExport() {
   const { post } = useFetchClient();
-  const notify = useNotification();
+  const { toggleNotification } = useNotification();
   const [isExporting, setIsExporting] = useState(false);
 
   const run = useCallback(
@@ -35,12 +35,12 @@ export function useExport() {
         URL.revokeObjectURL(url);
       } catch (err: any) {
         const message = err?.response?.data?.error?.message ?? 'Export failed';
-        (notify as any)({ type: 'warning', message });
+        toggleNotification({ type: 'warning', message });
       } finally {
         setIsExporting(false);
       }
     },
-    [post, notify],
+    [post, toggleNotification],
   );
 
   return { run, isExporting };

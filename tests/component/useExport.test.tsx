@@ -4,7 +4,7 @@ import { useExport } from '../../admin/src/hooks/useExport';
 
 const mockNotify = vi.fn();
 vi.mock('@strapi/strapi/admin', () => ({
-  useNotification: () => mockNotify,
+  useNotification: () => ({ toggleNotification: mockNotify }),
   useFetchClient: () => ({
     post: vi.fn(async () => ({
       data: new Blob(['xlsx-bytes'], {
