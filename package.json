@@ -92,7 +92,7 @@
     "displayName": "Data Exporter",
     "description": "Export Strapi v5 collections to xlsx files from the admin panel."
   },
-  "name": "strapi-plugin-data-exporter",
+  "name": "@vinodwac/strapi-plugin-data-exporter",
   "description": "Export Strapi v5 collections to xlsx files from the admin panel.",
   "license": "MIT",
   "author": "vinod <vinod.kv@webandcrafts.com>",

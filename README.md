@@ -1,6 +1,6 @@
-# strapi-plugin-data-exporter
+# @vinodwac/strapi-plugin-data-exporter
 
-[![npm version](https://img.shields.io/npm/v/strapi-plugin-data-exporter.svg)](https://www.npmjs.com/package/strapi-plugin-data-exporter)
+[![npm version](https://img.shields.io/npm/v/@vinodwac/strapi-plugin-data-exporter.svg)](https://www.npmjs.com/package/@vinodwac/strapi-plugin-data-exporter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/license/mit)
 
 Export Strapi v5 collection entries to `.xlsx` files directly from the admin panel.
@@ -16,9 +16,9 @@ Select one or more entries in any Content Manager list view; an **Export** actio
 ## Installation
 
 ```bash
-yarn add strapi-plugin-data-exporter
+yarn add @vinodwac/strapi-plugin-data-exporter
 # or
-npm install strapi-plugin-data-exporter
+npm install @vinodwac/strapi-plugin-data-exporter
 ```
 
 Enable the plugin in `config/plugins.ts` (or `.js`):
