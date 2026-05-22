@@ -122,14 +122,16 @@ test('flatten()', () => {
     expect(JSON.parse(row.metadata as string)).toEqual({ foo: 'bar' });
   });
 
-  it('formats datetime fields as DD-MM-YYYY', () => {
+  it('formats datetime fields as DD-MM-YYYY hh:mm:ss AM/PM', () => {
     const row = flatten(
       { publishedDate: '2026-04-27T14:30:15.000Z' },
       descriptors,
       flattenCtx,
     );
-    // The local date for that UTC instant is what shows; check the shape.
-    expect(row.publishedDate).toMatch(/^\d{2}-\d{2}-\d{4}$/);
+    // The local date/time for that UTC instant is what shows; check the shape.
+    expect(row.publishedDate).toMatch(
+      /^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2} (AM|PM)$/,
+    );
   });
 
   it('formats datetime fields with day/month/year ordering', () => {
@@ -140,10 +142,38 @@ test('flatten()', () => {
       descriptors,
       flattenCtx,
     );
-    const [dd, mm, yyyy] = (row.publishedDate as string).split('-');
+    const [dd, mm, yyyy] = (row.publishedDate as string)
+      .split(' ')[0]
+      .split('-');
     expect(dd).toBe('27');
     expect(mm).toBe('04');
     expect(yyyy).toBe('2026');
+  });
+
+  it('appends 12-hour time with AM/PM for datetime fields', () => {
+    const row = flatten(
+      // Local-time Date so the formatted time is timezone-independent.
+      { publishedDate: new Date(2026, 3, 27, 14, 30, 15) },
+      descriptors,
+      flattenCtx,
+    );
+    expect(row.publishedDate).toBe('27-04-2026 02:30:15 PM');
+  });
+
+  it('uses a 12-hour clock for midnight and noon', () => {
+    const midnight = flatten(
+      { publishedDate: new Date(2026, 3, 27, 0, 5, 0) },
+      descriptors,
+      flattenCtx,
+    );
+    expect(midnight.publishedDate).toBe('27-04-2026 12:05:00 AM');
+
+    const noon = flatten(
+      { publishedDate: new Date(2026, 3, 27, 12, 0, 0) },
+      descriptors,
+      flattenCtx,
+    );
+    expect(noon.publishedDate).toBe('27-04-2026 12:00:00 PM');
   });
 
   it('passes through unparseable date strings rather than NaN-NaN-NaN', () => {

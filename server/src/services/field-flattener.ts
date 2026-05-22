@@ -144,8 +144,9 @@ function valueForDescriptor(
 
   switch (d.type) {
     case 'date':
+      return formatDate(raw, false);
     case 'datetime':
-      return formatDdMmYyyy(raw);
+      return formatDate(raw, true);
 
     case 'string':
     case 'text':
