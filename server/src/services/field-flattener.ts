@@ -110,7 +110,10 @@ function pickByPath(obj: any, path: string): any {
   return path.split('.').reduce((acc, seg) => (acc == null ? acc : acc[seg]), obj);
 }
 
-function formatDdMmYyyy(raw: unknown): string | null {
+// Formats a date as DD-MM-YYYY, optionally appending a 12-hour
+// hh:mm:ss AM/PM time. `datetime` fields carry a time component and pass
+// withTime=true; pure `date` fields stay date-only.
+function formatDate(raw: unknown, withTime: boolean): string | null {
   if (raw == null) return null;
   const d = raw instanceof Date ? raw : new Date(raw as string);
   if (isNaN(d.getTime())) {
@@ -120,7 +123,14 @@ function formatDdMmYyyy(raw: unknown): string | null {
   const dd = String(d.getDate()).padStart(2, '0');
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const yyyy = String(d.getFullYear());
-  return `${dd}-${mm}-${yyyy}`;
+  const datePart = `${dd}-${mm}-${yyyy}`;
+  if (!withTime) return datePart;
+
+  const meridiem = d.getHours() < 12 ? 'AM' : 'PM';
+  const hh = String(d.getHours() % 12 || 12).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  return `${datePart} ${hh}:${min}:${ss} ${meridiem}`;
 }
 
 function valueForDescriptor(
