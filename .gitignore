@@ -47,6 +47,7 @@ $RECYCLE.BIN/
 *.jar
 *.rar
 *.tar
+*.tgz
 *.zip
 *.com
 *.class
@@ -140,3 +141,4 @@ yarn-error.log
 
 coverage
 .github
+.claude/
