@@ -135,6 +135,6 @@ Steps 4 and 5 are user-run because they require npm authentication and are exter
 
 ## Risks
 
-- **Older Strapi 5.x versions are untested.** The plugin was developed and tested against 5.43+. Declaring `^5.0.0` covers 5.0–5.42 by claim only. Mitigation: the README continues to list 5.43+ as the recommended floor in usage examples, and any user on 5.0–5.42 hitting a runtime issue can be told to upgrade Strapi.
+- **Older Strapi 5.x versions are untested.** The plugin was developed and tested against 5.43+. Declaring `^5.0.0` covers 5.0–5.42 by claim only — same posture as the README, which already advertises `^5.0.0`. Accepted residual risk: users on 5.0–5.42 hitting runtime issues will be directed to upgrade Strapi.
 - **`@strapi/sdk-plugin` removal from peers is conventional but not universally followed.** Some plugin templates keep it as a peer. Risk is negligible — at worst, consumers see no warning where they previously saw a phantom one.
 - **A typo in a peer range publishes another broken version.** Mitigated by the mandatory tarball-install verification step (§ Verification).
