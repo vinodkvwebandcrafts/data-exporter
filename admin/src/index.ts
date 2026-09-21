@@ -1,5 +1,6 @@
 import { PLUGIN_ID } from "./pluginId";
 import { ExportBulkAction } from "./components/ExportBulkAction";
+import { ExportDocumentAction } from "./components/ExportDocumentAction";
 import en from "./translations/en.json";
 
 export default {
@@ -13,6 +14,11 @@ export default {
     // selects ≥1 row. Receives the selected `documents`, the content-type
     // `model`, and the `collectionType` discriminator.
     app.getPlugin("content-manager")?.apis?.addBulkAction?.([ExportBulkAction]);
+
+    // Single types have no list view, so expose the export as a document action
+    // in the edit view's side panel instead. The component returns null for
+    // collection types.
+    app.getPlugin("content-manager")?.apis?.addDocumentAction?.([ExportDocumentAction]);
 
     // NOTE: RBAC permission actions are registered server-side via
     // `strapi.admin.services.permission.actionProvider.registerMany(...)` in

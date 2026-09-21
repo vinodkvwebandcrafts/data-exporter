@@ -15,6 +15,9 @@ function makeStrapi(opts: {
   entries: any[];
   config?: Partial<Record<string, any>>;
 }) {
+  const findFirst = vi.fn().mockResolvedValue(opts.entries[0] ?? null);
+  const count = vi.fn().mockResolvedValue(opts.total);
+  const findMany = vi.fn().mockResolvedValue(opts.entries);
   const config = {
     maxRows: 50_000,
     pageSize: 500,
@@ -31,12 +34,54 @@ function makeStrapi(opts: {
     config: {
       get: (key: string) => (key === 'plugin::data-exporter' ? config : undefined),
     },
-    documents: vi.fn(() => ({
-      count: vi.fn().mockResolvedValue(opts.total),
-      findMany: vi.fn().mockResolvedValue(opts.entries),
-    })),
+    documents: vi.fn(() => ({ count, findMany, findFirst })),
+    __mocks: { count, findMany, findFirst },
   };
 }
+
+test('exporter.run (single types)', () => {
+  it('exports the single document as one row via findFirst and skips the row cap', async () => {
+    const strapi = makeStrapi({
+      total: 0,
+      entries: [{ id: 1, title: 'Home', tagline: 'Welcome' }],
+      config: { maxRows: 0 },
+    });
+    const { stream, filename } = await run({
+      strapi: strapi as any,
+      uid: 'api::homepage.homepage',
+      query: { status: 'published' },
+      fields: ['title', 'tagline'],
+    });
+    const buf = await streamToBuffer(stream);
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(buf);
+    const ws = wb.worksheets[0];
+
+    expect(ws.rowCount).toBe(2); // header + one document
+    expect(ws.getRow(1).getCell(1).value).toBe('Title');
+    expect(ws.getRow(2).getCell(1).value).toBe('Home');
+    expect(ws.getRow(2).getCell(2).value).toBe('Welcome');
+    expect(filename).toMatch(/^homepage-/);
+    expect(strapi.__mocks.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'published' }),
+    );
+    expect(strapi.__mocks.count).not.toHaveBeenCalled();
+    expect(strapi.__mocks.findMany).not.toHaveBeenCalled();
+  });
+
+  it('produces a header-only sheet when the single type has never been saved', async () => {
+    const strapi = makeStrapi({ total: 0, entries: [] });
+    const { stream } = await run({
+      strapi: strapi as any,
+      uid: 'api::homepage.homepage',
+      query: {},
+    });
+    const buf = await streamToBuffer(stream);
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(buf);
+    expect(wb.worksheets[0].rowCount).toBe(1);
+  });
+});
 
 test('exporter.run', () => {
   it('rejects unknown uid', async () => {

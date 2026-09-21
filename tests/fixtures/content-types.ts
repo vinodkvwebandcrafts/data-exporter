@@ -74,8 +74,21 @@ export const sharedComment = {
   },
 } as const;
 
+export const homepageSingleType = {
+  uid: 'api::homepage.homepage',
+  kind: 'singleType',
+  info: { singularName: 'homepage', pluralName: 'homepages', displayName: 'Homepage' },
+  attributes: {
+    title: { type: 'string' },
+    tagline: { type: 'text' },
+  },
+};
+
 export const allFixtures = {
-  contentTypes: { 'api::article.article': articleContentType },
+  contentTypes: {
+    'api::article.article': articleContentType,
+    'api::homepage.homepage': homepageSingleType,
+  },
   components: {
     'shared.address': sharedAddress,
     'shared.country': sharedCountry,

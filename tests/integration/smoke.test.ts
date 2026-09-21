@@ -13,7 +13,7 @@ describe("integration smoke", () => {
     expect(strapi.plugin("data-exporter")).toBeDefined();
   });
 
-  it("registers the export action against real collection-type UIDs", async () => {
+  it("registers the export action against real content-type UIDs (collection and single types)", async () => {
     const strapi: any = await startStrapi();
 
     const action = strapi.admin.services.permission.actionProvider.get(
@@ -23,6 +23,7 @@ describe("integration smoke", () => {
     expect(action).toBeDefined();
     expect(action.section).toBe("contentTypes");
     expect(action.subjects).toContain("api::article.article");
+    expect(action.subjects).toContain("api::homepage.homepage");
     expect(action.subjects).not.toContain("plugin::content-manager.contentType");
   });
 });

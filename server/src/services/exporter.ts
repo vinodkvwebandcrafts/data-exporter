@@ -33,9 +33,7 @@ function err(code: string, message: string, extra: Record<string, unknown> = {})
 export async function run({ strapi, uid, query, fields }: RunArgs): Promise<RunResult> {
   const ct = (strapi as any).contentTypes?.[uid];
   if (!ct) throw err('UNKNOWN_UID', `Unknown content type: ${uid}`);
-  if (ct.kind !== 'collectionType') {
-    throw err('UNSUPPORTED_KIND', `Only collection types are supported (uid=${uid})`);
-  }
+  const isSingleType = ct.kind === 'singleType';
 
   const config = pluginConfig(strapi);
 
@@ -55,12 +53,15 @@ export async function run({ strapi, uid, query, fields }: RunArgs): Promise<RunR
   }
 
   const docs = (strapi as any).documents(uid);
-  const total = await docs.count(query);
-  if (total > config.maxRows) {
-    throw err('ROW_LIMIT_EXCEEDED', 'Export exceeds configured row limit', {
-      limit: config.maxRows,
-      observed: total,
-    });
+  // A single type holds at most one document, so the row cap can't be exceeded.
+  if (!isSingleType) {
+    const total = await docs.count(query);
+    if (total > config.maxRows) {
+      throw err('ROW_LIMIT_EXCEEDED', 'Export exceeds configured row limit', {
+        limit: config.maxRows,
+        observed: total,
+      });
+    }
   }
 
   const populate = derivePopulate(selected);
@@ -74,17 +75,24 @@ export async function run({ strapi, uid, query, fields }: RunArgs): Promise<RunR
   // Background pagination + write loop. Errors after stream open propagate via `stream.destroy(err)`.
   (async () => {
     try {
-      const pageSize = Math.min(config.pageSize, config.maxRows);
-      for (let page = 1; ; page++) {
-        const entries = await docs.findMany({
-          ...query,
-          populate,
-          pagination: { page, pageSize },
-        });
-        for (const entry of entries) {
-          appendRow(writer, flatten(entry, selected, { relationDisplayField: config.relationDisplayField }));
+      const writeEntry = (entry: any) =>
+        appendRow(writer, flatten(entry, selected, { relationDisplayField: config.relationDisplayField }));
+
+      if (isSingleType) {
+        // Single types have no list to paginate: export the one document (if any) as a single row.
+        const entry = await docs.findFirst({ ...query, populate });
+        if (entry) writeEntry(entry);
+      } else {
+        const pageSize = Math.min(config.pageSize, config.maxRows);
+        for (let page = 1; ; page++) {
+          const entries = await docs.findMany({
+            ...query,
+            populate,
+            pagination: { page, pageSize },
+          });
+          for (const entry of entries) writeEntry(entry);
+          if (entries.length < pageSize) break;
         }
-        if (entries.length < pageSize) break;
       }
       await commit(writer);
     } catch (e) {

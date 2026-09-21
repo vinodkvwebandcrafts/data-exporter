@@ -40,11 +40,11 @@ yarn develop
 
 ## Permissions
 
-Bulk-exporting a collection is intentionally separate from reading individual entries. After installing the plugin, grant the **Export collections** action to roles that should have it:
+Exporting is intentionally separate from reading individual entries. After installing the plugin, grant the **Export to xlsx** action to roles that should have it:
 
 1. Open **Settings → Administration Panel → Roles**.
 2. Pick a role (e.g. *Editor*).
-3. Under the relevant content type, tick **Export collections**.
+3. Under the relevant content type (in the **Collection Types** or **Single Types** tab), tick **Export to xlsx**.
 4. Save.
 
 Users without this permission will see a **403 Forbidden** toast when they try to export.
@@ -59,6 +59,8 @@ Super-admins always have access — they don't need explicit permission.
 4. The `.xlsx` downloads automatically with every flattenable field included for the selected entries.
 
 To export the entire collection, use the "select all" checkbox in the table header (Strapi-managed, paginates as expected).
+
+Single types have no list view, so they get an **Export** button in the edit view's side panel instead. It exports the version you're viewing (draft or published) as a one-row workbook.
 
 ## Configuration
 

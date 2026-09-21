@@ -48,7 +48,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     } catch (e: any) {
       switch (e.code) {
         case 'UNKNOWN_UID':
-        case 'UNSUPPORTED_KIND':
         case 'EMPTY_FIELDS':
         case 'INVALID_BODY':
           return ctx.badRequest(e.message, { code: e.code });
