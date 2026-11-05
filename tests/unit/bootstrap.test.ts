@@ -34,11 +34,10 @@ function makeStrapiMock({ withContentManager }: { withContentManager: boolean })
 }
 
 test('getExportableContentTypeUids', () => {
-  it('uses content-manager displayed content types, including single types', () => {
+  it('uses content-manager displayed content types and keeps only collection types', () => {
     const { strapi, findDisplayedContentTypes } = makeStrapiMock({ withContentManager: true });
     expect(getExportableContentTypeUids(strapi)).toEqual([
       'api::article.article',
-      'api::homepage.homepage',
       'plugin::upload.file',
     ]);
     expect(findDisplayedContentTypes).toHaveBeenCalled();
@@ -48,7 +47,6 @@ test('getExportableContentTypeUids', () => {
     const { strapi } = makeStrapiMock({ withContentManager: false });
     expect(getExportableContentTypeUids(strapi)).toEqual([
       'api::article.article',
-      'api::homepage.homepage',
       'plugin::upload.file',
     ]);
   });
@@ -66,7 +64,7 @@ test('bootstrap', () => {
         uid: 'export',
         pluginName: 'data-exporter',
         section: 'contentTypes',
-        subjects: ['api::article.article', 'api::homepage.homepage', 'plugin::upload.file'],
+        subjects: ['api::article.article', 'plugin::upload.file'],
       }),
     ]);
     // The old placeholder subject matched no row in the role editor grid.

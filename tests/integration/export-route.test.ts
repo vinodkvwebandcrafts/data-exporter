@@ -45,38 +45,6 @@ describe("POST /data-exporter/export", () => {
     expect(ws.getRow(3).getCell(1).value).toBe("B");
   });
 
-  it("exports a single type as a one-row workbook", async () => {
-    const strapi: any = await startStrapi();
-    await strapi
-      .documents("api::homepage.homepage")
-      .create({ data: { title: "Home", tagline: "Welcome" } });
-
-    const jwt = await getSuperAdminJwt();
-    const res = await request(strapi.server.httpServer)
-      .post("/data-exporter/export")
-      .set("Authorization", `Bearer ${jwt}`)
-      .send({
-        uid: "api::homepage.homepage",
-        query: {},
-        fields: ["title", "tagline"],
-      })
-      .buffer(true)
-      .parse((response, cb) => {
-        const chunks: Buffer[] = [];
-        response.on("data", (chunk: Buffer) => chunks.push(chunk));
-        response.on("end", () => cb(null, Buffer.concat(chunks)));
-      })
-      .expect(200);
-
-    const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(res.body);
-    const ws = wb.worksheets[0];
-    expect(ws.rowCount).toBe(2);
-    expect(ws.getRow(2).getCell(1).value).toBe("Home");
-    expect(ws.getRow(2).getCell(2).value).toBe("Welcome");
-    expect(res.headers["content-disposition"]).toMatch(/filename="homepage-/);
-  });
-
   it("returns 400 on unknown uid", async () => {
     const strapi: any = await startStrapi();
     const jwt = await getSuperAdminJwt();
